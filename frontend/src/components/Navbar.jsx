@@ -1,8 +1,18 @@
 import { ArrowRight } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import logo from "../assets/phish-logo-transparent.png";
+import { getAuthUser } from "../lib/api";
 
 const Navbar = () => {
+  const { data: authUser, isPending } = useQuery({
+    queryKey: ["authUser"],
+    queryFn: getAuthUser,
+    retry: false,
+    staleTime: 1000 * 60 * 60,
+    refetchOnWindowFocus: false,
+  });
+
   return (
     <div className="fixed left-1/2 top-5 z-50 w-full max-w-5xl -translate-x-1/2 px-4">
       <div className="navbar rounded-2xl border border-white/20 bg-base-100/70 px-5 py-2 shadow-lg backdrop-blur-xl">
@@ -31,10 +41,17 @@ const Navbar = () => {
         </div>
 
         <div className="navbar-end">
-          <Link to="/login" className="btn btn-neutral rounded-full px-6">
-            Login
-            <ArrowRight size={17} />
-          </Link>
+          {isPending ? (
+            <span className="loading loading-spinner loading-sm text-primary" />
+          ) : (
+            <Link
+              to={authUser ? "/dashboard" : "/login"}
+              className="btn btn-neutral rounded-full px-6"
+            >
+              {authUser ? "Dashboard" : "Login"}
+              <ArrowRight size={17} />
+            </Link>
+          )}
         </div>
       </div>
     </div>

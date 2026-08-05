@@ -1,6 +1,9 @@
 import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import logo from "../assets/phish-logo-transparent.png";
+import { getAuthUser } from "../lib/api";
 
 import {
   Mail,
@@ -45,6 +48,14 @@ const steps = [
 ];
 
 const Home = () => {
+  const { data: authUser, isPending } = useQuery({
+    queryKey: ["authUser"],
+    queryFn: getAuthUser,
+    retry: false,
+    staleTime: 1000 * 60 * 60,
+    refetchOnWindowFocus: false,
+  });
+
   useEffect(() => {
     const elements = document.querySelectorAll(".landing-page [data-reveal]");
     const observer = new IntersectionObserver(
@@ -96,14 +107,28 @@ const Home = () => {
           </p>
 
           <div data-reveal className="flex justify-center gap-5 mt-10">
-            <button className="btn btn-neutral rounded-full px-8">
-              Get Started
-              <ArrowRight size={18} />
-            </button>
+            {isPending ? (
+              <span className="loading loading-spinner loading-md text-primary" />
+            ) : authUser ? (
+              <Link to="/dashboard" className="btn btn-neutral rounded-full px-8">
+                Open Dashboard
+                <ArrowRight size={18} />
+              </Link>
+            ) : (
+              <>
+                <Link to="/login" className="btn btn-neutral rounded-full px-8">
+                  Get Started
+                  <ArrowRight size={18} />
+                </Link>
 
-            <button className="btn bg-white border-0 rounded-full shadow-md px-8">
-              Login
-            </button>
+                <Link
+                  to="/login"
+                  className="btn border-0 bg-white px-8 rounded-full shadow-md"
+                >
+                  Login
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Dashboard */}
